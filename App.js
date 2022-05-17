@@ -11,29 +11,18 @@ import {
   Image,
   TextInput,
 } from "react-native";
+import SearchModal from "./components/SearchModal";
 
-/*
-If arsed, do Todo with DB, else do Country visit list
-
-restcountries.com
-
-CREATE A REVERSE FILTER, ONLY SHOW THINGS THAT HAVE THE LETTERS MAX ON UDEMY SHOWED IT BEFORE (FILTER)
-
-useEffect with timeout. Like a wait before search/fetching
-*/
 export default function App() {
-  const [data, setData] = useState([]);
-  const [searchText, setSearchText] = useState("");
-
-  const dummyData = [
+  const visitArray = [
     {
       name: {
-        common: "Sweden",
+        common: "France",
       },
     },
     {
       name: {
-        common: "Finland",
+        common: "England",
       },
     },
     {
@@ -42,139 +31,125 @@ export default function App() {
       },
     },
   ];
-  useEffect(() => {
-    try {
-      const fetchData = async () => {
-        const response = await fetch("https://restcountries.com/v3.1/all");
-        let countryData = await response.json();
-        setData(countryData);
-        // console.log(data);
-      };
-      fetchData();
-    } catch (err) {
-      console.error(err);
-    }
-  }, []);
 
-  const filteredData = searchText
-    ? data.filter((userInput) =>
-        userInput.name.common.toLowerCase().includes(searchText.toLowerCase())
-      )
-    : data;
+  const visitedArray = [
+    {
+      name: {
+        common: "Sweden",
+      },
+      cca2: "SE",
+    },
+    {
+      name: {
+        common: "Canada",
+      },
+      cca2: "CA",
+    },
+    {
+      name: {
+        common: "Iraq",
+      },
+      cca2: "IQ",
+    },
+    {
+      name: {
+        common: "Syria",
+      },
+      cca2: "SY",
+    },
+  ];
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const openModalHandler = () => {
+    setIsModalVisible(true);
+  };
+
+  const closeModalHandler = () => {
+    setIsModalVisible(false);
+  };
 
   const renderItem = ({ item }) => (
-    <View style={styles.flagList}>
-      <Text style={styles.flagText}>{item.name.common}</Text>
-      <Image
-        style={styles.flag}
-        source={{
-          uri: item.flags.png,
-        }}
-      />
+    <View>
+      <Text>{item.name.common}</Text>
+      {/* Add Images here for later */}
     </View>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* <Pressable>
-        <Text>Search for a country</Text>
-      </Pressable> */}
-      <View style={styles.categories}>
-        {/* <View style={styles.savedList}>
-          <Text>Countries I want to visit</Text>
-          <FlatList
-            data={dummyData}
-            renderItem={({ item }) => (
-              <View>
-                <Text>{item.name.common}</Text>
-              </View>
-            )}
-          />
-
-        </View> */}
-
-        <TextInput
-          style={styles.searchbar}
-          onChangeText={setSearchText}
-          value={searchText}
-          placeholder="Search for a country..."
-        ></TextInput>
-      </View>
-
-      {/* Make the FlatList into a modal. Show the list of countries you want to visit otherwise */}
-
-      <View style={styles.listContainer}>
-        <FlatList
-          style={styles.flatList}
-          data={filteredData}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.cca2}
-        />
-      </View>
-
       <StatusBar style="auto" />
+
+      {!isModalVisible && (
+        <View style={styles.listContainer}>
+          <View style={styles.visitList}>
+            <Text style={styles.title}>Countries I want to visit</Text>
+            <FlatList data={visitArray} renderItem={renderItem} />
+          </View>
+
+          <View style={styles.visitedList}>
+            <Text style={styles.title}>Countries I have visited</Text>
+            <FlatList
+              data={visitedArray}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.cca2}
+            />
+          </View>
+
+          <Pressable style={styles.button} onPress={openModalHandler}>
+            <Text style={{ color: "white", fontSize: 15 }}>Open Modal</Text>
+          </Pressable>
+        </View>
+      )}
+
+      {isModalVisible && <SearchModal closeModal={closeModalHandler} />}
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: 80,
     flex: 1,
-    height: 400,
-    // backgroundColor: "green",
+    // width: "100%",
+    // height: "50%",
+    // flexDirection: "row",
+    // height: "80%",
     alignItems: "center",
     // justifyContent: "center",
   },
-  categories: {
-    // height: 50,
-    // paddingVertical: 10,
-    marginTop: 100,
-    // backgroundColor: "red",
-    flexDirection: "row",
-    justifyContent: "space-around",
-    alignItems: "center",
-  },
-  text: {
-    fontSize: 20,
-  },
   listContainer: {
-    // paddingVertical: 30,
-    // marginVertical: 30,
-    // height: 50,
-  },
-  flag: {
-    width: 160,
-    borderWidth: 1,
-    borderColor: "black",
-    height: 110,
-    marginLeft: 8,
-  },
-  flagText: {
-    fontSize: 20,
-    paddingBottom: 6,
-    fontWeight: "bold",
-    // textAlign: "center",
-  },
-  flagList: {
+    // flex: 1,
     // flexDirection: "row",
-    // margin: 6,
-    paddingVertical: 12,
-    alignItems: "center",
     justifyContent: "center",
+    // backgroundColor: "red",
+    // alignItems: "center",
   },
   flatList: {
-    // height: 400,
-    // width: "50%",
     // backgroundColor: "red",
-    // marginBottom: 30,
+    // height: "70%",
   },
-  searchbar: {
-    padding: 6,
-    width: "50%",
-    borderWidth: 1,
-    borderRadius: 3,
-    // borderColor: "#ccc",
-    fontSize: 16,
+  visitList: {
+    height: 200,
+  },
+  visitedList: {
+    // backgroundColor: "green",
+    height: 200,
+  },
+  title: {
+    padding: 20,
+    marginBottom: 12,
+    width: "100%",
+    // backgroundColor: "red",
+    borderRadius: 6,
+    fontSize: 18,
     textAlign: "center",
+  },
+  button: {
+    borderWidth: 1,
+    borderRadius: 6,
+    width: "100%",
+    padding: 18,
+    backgroundColor: "blue",
   },
 });
