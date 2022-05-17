@@ -20,7 +20,6 @@ export default function SearchModal(props) {
         const response = await fetch("https://restcountries.com/v3.1/all");
         let countryData = await response.json();
         setData(countryData);
-        console.log("hello");
       };
       fetchData();
     } catch (err) {
