@@ -1,61 +1,70 @@
 import { StatusBar } from "expo-status-bar";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   StyleSheet,
   Text,
   View,
   SafeAreaView,
   Pressable,
-  Button,
   FlatList,
   Image,
-  TextInput,
 } from "react-native";
+import AddToArrayModal from "./components/AddToArrayModal";
 import SearchModal from "./components/SearchModal";
 
 export default function App() {
-  const visitArray = [
+  const initialVisitArray = [
     {
       name: {
         common: "France",
       },
+      cca2: "FR",
+      flag: "https://flagcdn.com/w320/fr.png",
     },
     {
       name: {
-        common: "England",
+        common: "United Kingdom",
       },
+      cca2: "GB",
+      flag: "https://flagcdn.com/w320/gb.png",
     },
     {
       name: {
         common: "Denmark",
       },
+      cca2: "DK",
+      flag: "https://flagcdn.com/w320/dk.png",
     },
   ];
 
-  const visitedArray = [
+  const initialVisitedArray = [
     {
       name: {
         common: "Sweden",
       },
       cca2: "SE",
+      flag: "https://flagcdn.com/w320/se.png",
     },
     {
       name: {
         common: "Canada",
       },
       cca2: "CA",
+      flag: "https://flagcdn.com/w320/ca.png",
     },
     {
       name: {
         common: "Iraq",
       },
       cca2: "IQ",
+      flag: "https://flagcdn.com/w320/iq.png",
     },
     {
       name: {
         common: "Syria",
       },
       cca2: "SY",
+      flag: "https://flagcdn.com/w320/sy.png",
     },
   ];
 
@@ -69,10 +78,31 @@ export default function App() {
     setIsModalVisible(false);
   };
 
+  const [visitArray, setUpdateVisitArray] = useState(initialVisitArray);
+  const [visitedArray, setUpdateVisitedArray] = useState(initialVisitedArray);
+
+  const updateVisitArray = (selectedCountry) => {
+    setUpdateVisitArray((prevVisitArray) => [
+      selectedCountry,
+      ...prevVisitArray,
+    ]);
+  };
+  const updateVisitedArray = (selectedCountry) => {
+    setUpdateVisitedArray((prevVisitedArray) => [
+      selectedCountry,
+      ...prevVisitedArray,
+    ]);
+  };
+
   const renderItem = ({ item }) => (
     <View>
       <Text>{item.name.common}</Text>
-      {/* Add Images here for later */}
+      <Image
+        style={styles.flag}
+        source={{
+          uri: item.flag,
+        }}
+      />
     </View>
   );
 
@@ -84,13 +114,19 @@ export default function App() {
         <View style={styles.listContainer}>
           <View style={styles.visitList}>
             <Text style={styles.title}>Countries I want to visit</Text>
-            <FlatList data={visitArray} renderItem={renderItem} />
+            <FlatList
+              data={visitArray}
+              extraData={visitArray}
+              renderItem={renderItem}
+              keyExtractor={(item) => item.cca2}
+            />
           </View>
 
           <View style={styles.visitedList}>
             <Text style={styles.title}>Countries I have visited</Text>
             <FlatList
               data={visitedArray}
+              extraData={visitedArray}
               renderItem={renderItem}
               keyExtractor={(item) => item.cca2}
             />
@@ -102,7 +138,15 @@ export default function App() {
         </View>
       )}
 
-      {isModalVisible && <SearchModal closeModal={closeModalHandler} />}
+      {isModalVisible && (
+        <SearchModal
+          closeModal={closeModalHandler}
+          visitArray={visitArray}
+          visitedArray={visitedArray}
+          addToVisitArray={updateVisitArray}
+          addToVisitedArray={updateVisitedArray}
+        />
+      )}
     </SafeAreaView>
   );
 }
@@ -151,5 +195,13 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 18,
     backgroundColor: "blue",
+  },
+  flag: {
+    width: 50,
+    height: 50,
+    borderWidth: 1,
+    borderColor: "black",
+    borderRadius: 2,
+    // marginVertical: 8,
   },
 });
