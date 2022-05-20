@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import AddToArrayModal from "./AddToArrayModal";
 import {
   StyleSheet,
   Text,
@@ -13,6 +14,16 @@ import {
 export default function SearchModal(props) {
   const [data, setData] = useState([]);
   const [searchText, setSearchText] = useState("");
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const openModalHandler = () => {
+    setIsModalVisible(true);
+  };
+
+  const closeModalHandler = () => {
+    setIsModalVisible(false);
+  };
 
   useEffect(() => {
     try {
@@ -29,15 +40,49 @@ export default function SearchModal(props) {
 
   const renderItem = ({ item }) => (
     <View style={styles.flagList}>
-      <Text style={styles.flagText}>{item.name.common}</Text>
-      <Image
-        style={styles.flag}
-        source={{
-          uri: item.flags.png,
-        }}
-      />
+      <Pressable
+        /*
+      Works if you use updateVisitArray(item) but not if you send it to ArrayModal and use it as a prop there. (Undefined is not an object?)
+      The function being called in ArrayModal is getting called without the (item) part. Unsure how to fix that.
+      */
+        // onPress={() => setIsModalVisible(true)}
+        onPress={openModalHandler}
+        onLongPress={() => updateVisitArray(item)}
+      >
+        <Text style={styles.flagText}>{item.name.common}</Text>
+        <Image
+          style={styles.flag}
+          source={{
+            uri: item.flags.png,
+          }}
+        />
+      </Pressable>
     </View>
   );
+
+  const updateVisitArray = (item) => {
+    console.log(item);
+    const selectedCountry = {
+      name: {
+        common: item.name.common,
+      },
+      cca2: item.cca2,
+      flag: item.flags.png,
+    };
+    props.addToVisitArray(selectedCountry);
+  };
+
+  const updateVisitedArray = (item) => {
+    const selectedCountry = {
+      name: {
+        common: item.name.common,
+      },
+      cca2: item.cca2,
+      flag: item.flags.png,
+    };
+
+    props.addToVisitedArray(selectedCountry);
+  };
 
   const filteredData = searchText
     ? data.filter((userInput) =>
@@ -45,18 +90,25 @@ export default function SearchModal(props) {
       )
     : data;
 
-  const renderSeparator = () => (
-    <View style={{ borderWidth: 0.5, width: "80%", alignSelf: "center" }} />
-  );
-
-  const closeModalHandler = () => {
-    props.closeModal();
-  };
+  // const renderSeparator = () => (
+  //   <View style={{ borderWidth: 0.5, width: "80%", alignSelf: "center" }} />
+  // );
 
   return (
     <Modal visible={true} transparent={true}>
       <View style={styles.container}>
-        <Pressable onPress={closeModalHandler}>
+        {isModalVisible && (
+          <AddToArrayModal
+            closeModal={closeModalHandler}
+            updateVisitArray={updateVisitArray}
+            updateVisitedArray={updateVisitedArray}
+            // visitArray={visitArray}
+            // visitedArray={visitArray}
+            // addToVisitArray={updateVisitArray}
+            // addToVisitedArray={updateVisitedArray}
+          />
+        )}
+        <Pressable onPress={props.closeModal}>
           <Text>X</Text>
         </Pressable>
         <TextInput
