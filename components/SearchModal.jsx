@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import AddToArrayModal from "./AddToArrayModal";
+// import AddToArrayModal from "./AddToArrayModal";
 import {
   StyleSheet,
   Text,
@@ -14,10 +14,12 @@ import {
 export default function SearchModal(props) {
   const [data, setData] = useState([]);
   const [searchText, setSearchText] = useState("");
+  const [country, setCountry] = useState({});
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const openModalHandler = () => {
+  const openModalHandler = (item) => {
+    setCountry(item);
     setIsModalVisible(true);
   };
 
@@ -46,8 +48,10 @@ export default function SearchModal(props) {
       The function being called in ArrayModal is getting called without the (item) part. Unsure how to fix that.
       */
         // onPress={() => setIsModalVisible(true)}
-        onPress={openModalHandler}
-        onLongPress={() => updateVisitArray(item)}
+
+        // () => testPressable(item)
+        onPress={() => openModalHandler(item)}
+        onLongPress={() => updateVisitedArray(item)}
       >
         <Text style={styles.flagText}>{item.name.common}</Text>
         <Image
@@ -60,16 +64,24 @@ export default function SearchModal(props) {
     </View>
   );
 
-  const updateVisitArray = (item) => {
-    console.log(item);
+  const testPressable = (item) => {
+    const country = item;
+
+    // console.log(country);
+
+    updateVisitArray(country);
+  };
+
+  const updateVisitArray = (country) => {
     const selectedCountry = {
       name: {
-        common: item.name.common,
+        common: country.name.common,
       },
-      cca2: item.cca2,
-      flag: item.flags.png,
+      cca2: country.cca2,
+      flag: country.flags.png,
     };
     props.addToVisitArray(selectedCountry);
+    console.log(selectedCountry);
   };
 
   const updateVisitedArray = (item) => {
@@ -98,16 +110,19 @@ export default function SearchModal(props) {
     <Modal visible={true} transparent={true}>
       <View style={styles.container}>
         {isModalVisible && (
-          <AddToArrayModal
-            closeModal={closeModalHandler}
-            updateVisitArray={updateVisitArray}
-            updateVisitedArray={updateVisitedArray}
-            // visitArray={visitArray}
-            // visitedArray={visitArray}
-            // addToVisitArray={updateVisitArray}
-            // addToVisitedArray={updateVisitedArray}
-          />
+          <Modal transparent={true}>
+            <Pressable onPress={closeModalHandler}>
+              <Text>X</Text>
+            </Pressable>
+            <Pressable onPress={() => testPressable(country)}>
+              <Text>Add to Visit</Text>
+            </Pressable>
+            <Pressable onPress={props.updateVisitedArray}>
+              <Text>Add to Visited</Text>
+            </Pressable>
+          </Modal>
         )}
+
         <Pressable onPress={props.closeModal}>
           <Text>X</Text>
         </Pressable>
@@ -189,3 +204,20 @@ const styles = StyleSheet.create({
     alignSelf: "center",
   },
 });
+
+{
+  /* Modal for the popup menu, cant't figure it out */
+}
+{
+  /* {isModalVisible && (
+          <AddToArrayModal
+            closeModal={closeModalHandler}
+            updateVisitArray={testPressable}
+            updateVisitedArray={updateVisitedArray}
+            // visitArray={visitArray}
+            // visitedArray={visitArray}
+            // addToVisitArray={updateVisitArray}
+            // addToVisitedArray={updateVisitedArray}
+          />
+        )} */
+}

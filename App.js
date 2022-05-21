@@ -141,8 +141,6 @@ export default function App() {
       {isModalVisible && (
         <SearchModal
           closeModal={closeModalHandler}
-          visitArray={visitArray}
-          visitedArray={visitedArray}
           addToVisitArray={updateVisitArray}
           addToVisitedArray={updateVisitedArray}
         />
