@@ -4,5 +4,5 @@ You can search for countries and add them to the vist/visited list and also move
 
 ## Tools:
 * Visual Studio Code
-* React Native with Expo Framework
+* React Native with the Expo Framework
 * Android Studio AVD
