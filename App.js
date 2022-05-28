@@ -8,6 +8,7 @@ import {
   Pressable,
   FlatList,
   Image,
+  Alert,
 } from "react-native";
 import SearchModal from "./components/SearchModal";
 
@@ -69,22 +70,28 @@ export default function App() {
 
   const [visitArray, setUpdateVisitArray] = useState(initialVisitArray);
   const [visitedArray, setUpdateVisitedArray] = useState(initialVisitedArray);
-  const [didSucceed, setDidSucced] = useState(true);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const openModalHandler = () => {
+    setIsModalVisible(true);
+  };
+
+  const closeModalHandler = () => {
+    setIsModalVisible(false);
+  };
 
   const updateVisitArray = (selectedCountry) => {
-    // Later try useState selectedCountry to create the checkDuplicate(arr) function
-    //Instead of some try find
     const alreadyExists = visitArray.some((element) => {
       return selectedCountry.cca2 === element.cca2;
     });
+
     if (!alreadyExists) {
       setUpdateVisitArray((prevVisitArray) => [
         selectedCountry,
         ...prevVisitArray,
       ]);
-      alreadyExists ? setDidSucced(false) : setDidSucced(true);
-
-      console.log(didSucceed);
+    } else {
+      Alert.alert("Error", "The country already exists in the visit list.");
     }
   };
 
@@ -98,8 +105,8 @@ export default function App() {
         selectedCountry,
         ...prevVisitedArray,
       ]);
-      // setDidSucced(true);
-      // Maybe put undefined in didSucced then go to else if
+    } else {
+      Alert.alert("Error", "The country already exists in the visited list.");
     }
   };
 
@@ -119,14 +126,12 @@ export default function App() {
           }}
         />
         <View style={{ flexDirection: "row" }}>
-          {/* Fix button functionality */}
-
           <Pressable onPress={() => moveToVisited(item)}>
-            <Text style={styles.moveVisitBtn}>Move</Text>
+            <Text style={styles.moveBtn}>Move</Text>
           </Pressable>
 
           <Pressable onPress={() => deleteVisit(item)}>
-            <Text style={styles.deleteVisitBtn}>Delete</Text>
+            <Text style={styles.deleteBtn}>Delete</Text>
           </Pressable>
         </View>
       </View>
@@ -150,52 +155,65 @@ export default function App() {
         />
         <View style={{ flexDirection: "row" }}>
           <Pressable onPress={() => moveToVisit(item)}>
-            <Text style={styles.moveVisitBtn}>Move</Text>
+            <Text style={styles.moveBtn}>Move</Text>
           </Pressable>
 
           <Pressable onPress={() => deleteVisited(item)}>
-            <Text style={styles.deleteVisitBtn}>Delete</Text>
+            <Text style={styles.deleteBtn}>Delete</Text>
           </Pressable>
         </View>
       </View>
     </View>
   );
-  // FIX MOVE COUNTRY DOUBLE KEY CCA2
+
   const moveToVisited = (movedCountry) => {
-    setUpdateVisitArray((updatedArr) => {
-      return updatedArr.filter((country) => country !== movedCountry);
+    const alreadyExists = visitedArray.some((element) => {
+      return movedCountry.cca2 === element.cca2;
     });
 
-    setUpdateVisitedArray((prevVisitedArray) => [
-      movedCountry,
-      ...prevVisitedArray,
-    ]);
+    if (!alreadyExists) {
+      setUpdateVisitArray((updatedArr) => {
+        return updatedArr.filter((country) => country !== movedCountry);
+      });
+
+      setUpdateVisitedArray((prevVisitedArray) => [
+        movedCountry,
+        ...prevVisitedArray,
+      ]);
+    } else {
+      Alert.alert("Error", "The country already exists in the visited list.");
+    }
   };
+
   const moveToVisit = (movedCountry) => {
-    setUpdateVisitedArray((updatedArr) => {
-      return updatedArr.filter((country) => country !== movedCountry);
+    const alreadyExists = visitArray.some((element) => {
+      return movedCountry.cca2 === element.cca2;
     });
-    setUpdateVisitArray((prevVisitArray) => [movedCountry, ...prevVisitArray]);
+
+    if (!alreadyExists) {
+      setUpdateVisitedArray((updatedArr) => {
+        return updatedArr.filter((country) => country !== movedCountry);
+      });
+
+      setUpdateVisitArray((prevVisitArray) => [
+        movedCountry,
+        ...prevVisitArray,
+      ]);
+    } else {
+      Alert.alert("Error", "The country already exists in the visit list.");
+    }
   };
+
   const deleteVisit = (deletedCountry) => {
     setUpdateVisitArray((updatedArr) => {
       return updatedArr.filter((country) => country !== deletedCountry);
     });
   };
+
   const deleteVisited = (deletedCountry) => {
     setUpdateVisitedArray((updatedArr) => {
       return updatedArr.filter((country) => country !== deletedCountry);
     });
-  };
-
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
-  const openModalHandler = () => {
-    setIsModalVisible(true);
-  };
-
-  const closeModalHandler = () => {
-    setIsModalVisible(false);
   };
 
   const sortArray = (arr) => {
@@ -212,30 +230,23 @@ export default function App() {
           addToVisitArray={updateVisitArray}
           addToVisitedArray={updateVisitedArray}
           sortArray={sortArray}
-          didSucced={didSucceed}
         />
       ) : (
         <View>
-          {/* <View style={styles.visitList}> */}
           <Text style={styles.title}>Countries I want to visit</Text>
           <FlatList
-            // style={styles.visitList}
+            style={{ height: "50%" }}
             data={sortArray(visitArray)}
             extraData={visitArray}
             renderItem={renderVisitItems}
             keyExtractor={(item) => item.cca2}
             showsVerticalScrollIndicator={false}
-            bounces={false}
-            alwaysBounceHorizontal={false}
-            alwaysBounceVertical={false}
             overScrollMode="never"
           />
-          {/* </View> */}
 
-          {/* <View style={styles.visitedList}> */}
           <Text style={styles.title}>Countries I have visited</Text>
           <FlatList
-            // style={styles.visitedList}
+            style={{ height: "50%" }}
             data={sortArray(visitedArray)}
             extraData={visitedArray}
             renderItem={renderVisitedItems}
@@ -244,11 +255,9 @@ export default function App() {
             overScrollMode="never"
           />
 
-          {/* </View> */}
-
-          <Pressable style={styles.button} onPress={openModalHandler}>
+          <Pressable style={styles.openModalBtn} onPress={openModalHandler}>
             <Text style={{ color: "white", fontSize: 15, textAlign: "center" }}>
-              Search
+              Add a country
             </Text>
           </Pressable>
         </View>
@@ -265,25 +274,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-
-  // visitList: {
-  //   height: "50%",
-  // },
-  // visitedList: {
-  //   height: "50%",
-  //
-  // },
-  deleteVisitBtn: {
+  deleteBtn: {
     fontSize: 20,
     marginLeft: 15,
     padding: 3,
     backgroundColor: "#e01502",
     color: "white",
     borderWidth: 1,
-    // color: "red",
-    // alignSelf: "flex-end",
   },
-  moveVisitBtn: {
+  moveBtn: {
     fontSize: 20,
     marginLeft: 20,
     padding: 3,
@@ -292,41 +291,18 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     color: "white",
   },
-
-  deleteVisitedBtn: {
-    fontSize: 20,
-    paddingBottom: 15,
-    // color: "red",
-    // alignSelf: "center",
-  },
-  moveVisitedBtn: {
-    fontSize: 26,
-    alignSelf: "center",
-    color: "blue",
-  },
-
   title: {
     padding: 20,
-    // paddingVertical: 6,
-    // marginBottom: 12,
-    // paddingTop: 10,
-    // paddingBottom: 15,
     fontSize: 18,
     textAlign: "center",
-    // backgroundColor: "#ff0000",
     color: "white",
-    textDecorationLine: "underline",
   },
-  button: {
-    // marginVertical: 3,
+  openModalBtn: {
     marginTop: 15,
-    marginBottom: 3,
-
+    marginBottom: 6,
     padding: 18,
     borderWidth: 1,
     borderRadius: 6,
-    // alignSelf: "center",
-    // width: 100,
     backgroundColor: "#0399fc",
   },
   flag: {
@@ -334,16 +310,12 @@ const styles = StyleSheet.create({
     height: 75,
     borderWidth: 1,
     borderColor: "black",
-    // borderRadius: 2,
   },
   flagText: {
     fontSize: 19,
     paddingBottom: 6,
     paddingTop: 3,
-    // paddingLeft: 25,
     color: "white",
-    // fontWeight: "bold",
     textAlign: "auto",
-    // width: 80,
   },
 });

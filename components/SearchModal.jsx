@@ -58,10 +58,6 @@ export default function SearchModal(props) {
   );
 
   const updateVisitArray = (country) => {
-    //  If country already exists in that list then deny it with an error message REACT NATIVE ALERT
-    //      if (country.cca2) {
-    //
-    //      }
     const selectedCountry = {
       name: {
         common: country.name.common,
@@ -71,7 +67,6 @@ export default function SearchModal(props) {
     };
 
     props.addToVisitArray(selectedCountry);
-    //useState not updating fast enough which makes it think it is false, use an React Native Alert instead
   };
 
   const updateVisitedArray = (country) => {
@@ -84,10 +79,8 @@ export default function SearchModal(props) {
     };
 
     props.addToVisitedArray(selectedCountry);
-    closeModalHandler();
   };
 
-  //  Make list more accurate ie: US first before any other US
   const filteredData = searchText
     ? props
         .sortArray(data)
@@ -96,19 +89,18 @@ export default function SearchModal(props) {
         )
     : props.sortArray(data);
 
-  // const renderSeparator = () => (
-  //   <View style={{ borderWidth: 0.5, width: "80%", alignSelf: "center" }} />
-  // );
-
   return (
-    <Modal transparent={true}>
+    <Modal
+      transparent={true}
+      animationType="slide"
+      onRequestClose={props.closeModal}
+    >
       {isModalVisible && (
         <AddToArrayModal
           closeModal={closeModalHandler}
           country={country}
           updateVisitArray={updateVisitArray}
           updateVisitedArray={updateVisitedArray}
-          didSucced={props.didSucceed}
         />
       )}
 
@@ -123,27 +115,21 @@ export default function SearchModal(props) {
         placeholder="Search..."
         multiline={true}
         numberOfLines={1}
-        // textAlign={"center"}
-        // textAlignVertical="top"
       />
       <View style={{ marginTop: 40, borderBottomWidth: 0.6 }} />
 
       <FlatList
-        //   style={styles.flatList}
         data={filteredData}
         renderItem={renderItem}
         keyExtractor={(item) => item.cca2}
         showsVerticalScrollIndicator={false}
         overScrollMode="never"
-        // ListHeaderComponent={}
-        //   ItemSeparatorComponent={renderSeparator}
       />
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  listContainer: {},
   flag: {
     width: 300,
     height: 180,
@@ -162,7 +148,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  flatList: {},
   searchbar: {
     padding: 12,
     marginTop: 6,
@@ -185,7 +170,6 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
     color: "white",
     fontSize: 16,
-    textAlign: "center",
     alignSelf: "flex-start",
   },
 });
