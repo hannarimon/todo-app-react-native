@@ -1,27 +1,27 @@
-// // import { useState, useEffect } from "react";
-// import {
-//   StyleSheet,
-//   Text,
-//   View,
-//   FlatList,
-//   Image,
-//   TextInput,
-//   Modal,
-//   Pressable,
-// } from "react-native";
-//
-// export default function AddToArrayModal(props) {
-//   return (
-//     <Modal visible={true} transparent={true}>
-//       <Pressable onPress={props.closeModal}>
-//         <Text>X</Text>
-//       </Pressable>
-//       <Pressable onPress={props.updateVisitArray}>
-//         <Text>Add to Visit</Text>
-//       </Pressable>
-//       <Pressable onPress={props.updateVisitedArray}>
-//         <Text>Add to Visited</Text>
-//       </Pressable>
-//     </Modal>
-//   );
-// }
+import { StyleSheet, Text, Modal, Pressable, View } from "react-native";
+
+export default function AddToArrayModal(props) {
+  return (
+    //Fix Add Country Modal Styling
+    <Modal transparent={true}>
+      <View style={styles.container}>
+        <Pressable onPress={props.closeModal}>
+          <Text>X</Text>
+        </Pressable>
+        <Pressable onPress={() => props.updateVisitArray(props.country)}>
+          <Text>Add to Visit</Text>
+        </Pressable>
+        <Pressable onPress={() => props.updateVisitedArray(props.country)}>
+          <Text>Add to Visited</Text>
+        </Pressable>
+      </View>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+    // justifyContent: "flex-end",
+  },
+});

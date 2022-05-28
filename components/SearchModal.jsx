@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-// import AddToArrayModal from "./AddToArrayModal";
 import {
   StyleSheet,
   Text,
@@ -10,6 +9,7 @@ import {
   Modal,
   Pressable,
 } from "react-native";
+import AddToArrayModal from "./AddToArrayModal";
 
 export default function SearchModal(props) {
   const [data, setData] = useState([]);
@@ -32,7 +32,7 @@ export default function SearchModal(props) {
       const fetchData = async () => {
         const response = await fetch("https://restcountries.com/v3.1/all");
         let countryData = await response.json();
-        setData(countryData);
+        setData(countryData.sort());
       };
       fetchData();
     } catch (err) {
@@ -43,15 +43,8 @@ export default function SearchModal(props) {
   const renderItem = ({ item }) => (
     <View style={styles.flagList}>
       <Pressable
-        /*
-      Works if you use updateVisitArray(item) but not if you send it to ArrayModal and use it as a prop there. (Undefined is not an object?)
-      The function being called in ArrayModal is getting called without the (item) part. Unsure how to fix that.
-      */
-        // onPress={() => setIsModalVisible(true)}
-
-        // () => testPressable(item)
         onPress={() => openModalHandler(item)}
-        onLongPress={() => updateVisitedArray(item)}
+        onLongPress={() => openModalHandler(item)}
       >
         <Text style={styles.flagText}>{item.name.common}</Text>
         <Image
@@ -64,15 +57,11 @@ export default function SearchModal(props) {
     </View>
   );
 
-  const testPressable = (item) => {
-    const country = item;
-
-    // console.log(country);
-
-    updateVisitArray(country);
-  };
-
   const updateVisitArray = (country) => {
+    //  If country already exists in that list then deny it with an error message REACT NATIVE ALERT
+    //      if (country.cca2) {
+    //
+    //      }
     const selectedCountry = {
       name: {
         common: country.name.common,
@@ -80,144 +69,123 @@ export default function SearchModal(props) {
       cca2: country.cca2,
       flag: country.flags.png,
     };
+
     props.addToVisitArray(selectedCountry);
-    console.log(selectedCountry);
+    //useState not updating fast enough which makes it think it is false, use an React Native Alert instead
   };
 
-  const updateVisitedArray = (item) => {
+  const updateVisitedArray = (country) => {
     const selectedCountry = {
       name: {
-        common: item.name.common,
+        common: country.name.common,
       },
-      cca2: item.cca2,
-      flag: item.flags.png,
+      cca2: country.cca2,
+      flag: country.flags.png,
     };
 
     props.addToVisitedArray(selectedCountry);
+    closeModalHandler();
   };
 
+  //  Make list more accurate ie: US first before any other US
   const filteredData = searchText
-    ? data.filter((userInput) =>
-        userInput.name.common.toLowerCase().includes(searchText.toLowerCase())
-      )
-    : data;
+    ? props
+        .sortArray(data)
+        .filter((item) =>
+          item.name.common.toLowerCase().includes(searchText.toLowerCase())
+        )
+    : props.sortArray(data);
 
   // const renderSeparator = () => (
   //   <View style={{ borderWidth: 0.5, width: "80%", alignSelf: "center" }} />
   // );
 
   return (
-    <Modal visible={true} transparent={true}>
-      <View style={styles.container}>
-        {isModalVisible && (
-          <Modal transparent={true}>
-            <Pressable onPress={closeModalHandler}>
-              <Text>X</Text>
-            </Pressable>
-            <Pressable onPress={() => testPressable(country)}>
-              <Text>Add to Visit</Text>
-            </Pressable>
-            <Pressable onPress={props.updateVisitedArray}>
-              <Text>Add to Visited</Text>
-            </Pressable>
-          </Modal>
-        )}
-
-        <Pressable onPress={props.closeModal}>
-          <Text>X</Text>
-        </Pressable>
-        <TextInput
-          style={styles.searchbar}
-          onChangeText={setSearchText}
-          value={searchText}
-          placeholder="Search for a country..."
+    <Modal transparent={true}>
+      {isModalVisible && (
+        <AddToArrayModal
+          closeModal={closeModalHandler}
+          country={country}
+          updateVisitArray={updateVisitArray}
+          updateVisitedArray={updateVisitedArray}
+          didSucced={props.didSucceed}
         />
+      )}
 
-        <FlatList
-          //   style={styles.flatList}
-          data={filteredData}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.cca2}
-          //   ItemSeparatorComponent={renderSeparator}
-        />
-      </View>
+      <Pressable onPress={props.closeModal}>
+        <Text style={styles.closeBtn}>X</Text>
+      </Pressable>
+
+      <TextInput
+        style={styles.searchbar}
+        onChangeText={setSearchText}
+        value={searchText}
+        placeholder="Search..."
+        multiline={true}
+        numberOfLines={1}
+        // textAlign={"center"}
+        // textAlignVertical="top"
+      />
+      <View style={{ marginTop: 40, borderBottomWidth: 0.6 }} />
+
+      <FlatList
+        //   style={styles.flatList}
+        data={filteredData}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.cca2}
+        showsVerticalScrollIndicator={false}
+        overScrollMode="never"
+        // ListHeaderComponent={}
+        //   ItemSeparatorComponent={renderSeparator}
+      />
     </Modal>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 60,
-    marginHorizontal: 20,
-    // paddingHorizontal: 5,
-    // backgroundColor: "red",
-    borderWidth: 1,
-    borderColor: "black",
-    borderRadius: 6,
-    // padding: 40,
-    height: "85%",
-  },
-  //   godFather: {
-  //     padding: 6,
-  //   },
-  listContainer: {
-    // paddingVertical: 30,
-    // marginVertical: 30,
-    // height: 50,
-  },
+  listContainer: {},
   flag: {
     width: 300,
     height: 180,
     borderWidth: 1,
     borderColor: "black",
-    borderRadius: 2,
     marginVertical: 8,
   },
   flagText: {
-    fontSize: 20,
+    fontSize: 18,
     paddingBottom: 6,
-    fontWeight: "bold",
-    // textAlign: "center",
+    textAlign: "center",
+    color: "white",
   },
   flagList: {
-    // flexDirection: "row",
-    // margin: 6,
     paddingVertical: 12,
     alignItems: "center",
     justifyContent: "center",
   },
-  flatList: {
-    // height: 400,
-    // width: "50%",
-    // backgroundColor: "red",
-    // marginBottom: 30,
-  },
+  flatList: {},
   searchbar: {
     padding: 12,
-    marginTop: 12,
-    width: "70%",
+    marginTop: 6,
+    width: "80%",
     borderWidth: 1,
     borderRadius: 3,
-    // borderColor: "#ccc",
     fontSize: 16,
     textAlign: "center",
     alignSelf: "center",
+    color: "white",
+  },
+  closeBtn: {
+    backgroundColor: "#0399fc",
+    marginTop: 4,
+    marginLeft: 40,
+    borderRadius: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    textShadowColor: "black",
+    textShadowRadius: 3,
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
+    alignSelf: "flex-start",
   },
 });
-
-{
-  /* Modal for the popup menu, cant't figure it out */
-}
-{
-  /* {isModalVisible && (
-          <AddToArrayModal
-            closeModal={closeModalHandler}
-            updateVisitArray={testPressable}
-            updateVisitedArray={updateVisitedArray}
-            // visitArray={visitArray}
-            // visitedArray={visitArray}
-            // addToVisitArray={updateVisitArray}
-            // addToVisitedArray={updateVisitedArray}
-          />
-        )} */
-}
