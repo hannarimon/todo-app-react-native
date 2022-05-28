@@ -1,4 +1,4 @@
-# todo-app-react-native
+# Travel list "todo" app
 School assignment in which we were tasked to creat a mobile app using React Native. You can add countries you want to visit or have already visited.
 
 # Tools:
